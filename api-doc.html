@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TripMate API 接口文档</title>
+    <style>
+        :root {
+            --primary: #2563eb; --green: #059669; --red: #dc2626;
+            --bg: #f8fafc; --card: #ffffff; --border: #e2e8f0;
+            --text: #1e293b; --text-sub: #64748b; --code-bg: #f1f5f9;
+            --orange: #ea580c; --purple: #7c3aed;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        .container { max-width: 960px; margin: 0 auto; padding: 40px 24px; }
+        header { text-align: center; margin-bottom: 48px; }
+        header h1 { font-size: 28px; margin-bottom: 8px; }
+        header p { color: var(--text-sub); font-size: 14px; }
+
+        .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 40px; }
+        .meta-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+        .meta-card .label { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; }
+        .meta-card .value { font-weight: 600; font-size: 14px; }
+
+        .toc { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin-bottom: 40px; }
+        .toc h2 { font-size: 16px; margin-bottom: 12px; }
+        .toc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 8px 24px; }
+        .toc-item { font-size: 13px; }
+        .toc-item .method { display: inline-block; width: 44px; text-align: center; padding: 1px 6px; border-radius: 3px; font-weight: 600; font-size: 11px; margin-right: 6px; color: #fff; }
+        .toc-item .method.post { background: var(--primary); }
+        .toc-item .method.get { background: var(--green); }
+        .toc-item .method.put { background: var(--orange); }
+        .toc-item .method.delete { background: var(--red); }
+        .toc-item .lock { margin-left: 4px; font-size: 10px; }
+
+        h2 { font-size: 20px; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+        .badge.auth { background: #fef3c7; color: #b45309; }
+        .badge.pub { background: #dcfce7; color: #15803d; }
+        .badge.admin { background: #ede9fe; color: #6d28d9; }
+
+        .endpoint { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+        .endpoint-header { padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+        .method { display: inline-block; padding: 3px 10px; border-radius: 4px; font-weight: 700; font-size: 12px; text-transform: uppercase; color: #fff; }
+        .method.post { background: var(--primary); }
+        .method.get { background: var(--green); }
+        .method.put { background: var(--orange); }
+        .method.delete { background: var(--red); }
+        .endpoint-url { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 14px; font-weight: 500; flex: 1; }
+        .endpoint-body { padding: 16px 20px; }
+        .endpoint-body > p:first-child { color: var(--text-sub); font-size: 13px; margin-bottom: 12px; }
+
+        h4 { font-size: 13px; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px; }
+        table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; font-size: 13px; }
+        th, td { border: 1px solid var(--border); padding: 7px 12px; text-align: left; }
+        th { background: #f8fafc; font-weight: 600; font-size: 12px; color: var(--text-sub); }
+        td code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+        pre { background: #1e293b; color: #e2e8f0; padding: 14px 16px; border-radius: 8px; overflow-x: auto; font-size: 12px; margin: 8px 0 16px; line-height: 1.5; font-family: 'SF Mono', 'Fira Code', monospace; }
+
+        .note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 13px; }
+        .info { background: #dbeafe; border-left: 4px solid var(--primary); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 16px 0; font-size: 13px; }
+
+        .auth-flow { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin: 16px 0; }
+        .auth-steps { list-style: none; counter-reset: step; padding: 0; }
+        .auth-steps li { counter-increment: step; padding: 8px 0 8px 36px; position: relative; font-size: 14px; }
+        .auth-steps li::before { content: counter(step); position: absolute; left: 0; top: 8px; width: 24px; height: 24px; background: var(--primary); color: #fff; border-radius: 50%; text-align: center; font-size: 12px; font-weight: 600; line-height: 24px; }
+
+        .error-table td:first-child { font-family: 'SF Mono', 'Fira Code', monospace; }
+        .summary-table td:first-child { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; }
+        .summary-table td:last-child { font-size: 13px; min-width: 140px; }
+        hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TripMate API 接口文档</h1>
+            <p>版本 0.0.1-SNAPSHOT | 共 25 个接口 · 6 个模块 | 最后更新 2026-06-26</p>
+        </header>
+
+        <!-- 项目概况 -->
+        <div class="meta-grid">
+            <div class="meta-card"><div class="label">Base URL</div><div class="value">http://localhost:8080</div></div>
+            <div class="meta-card"><div class="label">安全模式</div><div class="value">JWT 无状态 + RBAC</div></div>
+            <div class="meta-card"><div class="label">Token 有效期</div><div class="value">7 天</div></div>
+            <div class="meta-card"><div class="label">数据库</div><div class="value">MySQL + Redis</div></div>
+            <div class="meta-card"><div class="label">公开接口</div><div class="value">5 个</div></div>
+            <div class="meta-card"><div class="label">需认证接口</div><div class="value">15 个</div></div>
+            <div class="meta-card"><div class="label">管理员专属</div><div class="value">5 个</div></div>
+            <div class="meta-card"><div class="label">角色</div><div class="value">USER / ADMIN</div></div>
+        </div>
+
+        <!-- 目录 -->
+        <div class="toc">
+            <h2>接口速查 🔓公开 🔒需登录 👑管理员</h2>
+            <div class="toc-grid">
+                <div class="toc-item"><span class="method post">POST</span> /api/users/register <span class="lock">🔓</span></div>
+                <div class="toc-item"><span class="method post">POST</span> /api/users/login <span class="lock">🔓</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/attractions <span class="lock">🔓</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/attractions/{id} <span class="lock">🔓</span></div>
+                <div class="toc-item"><span class="method post">POST</span> /api/attractions <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method put">PUT</span> /api/attractions/{id} <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method delete">DELETE</span> /api/attractions/{id} <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method post">POST</span> /api/behaviors <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/behaviors <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/recommendations <span class="lock">🔓</span></div>
+                <div class="toc-item"><span class="method post">POST</span> /api/trips <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/trips <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/trips/{id} <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/trips/{id}/attractions <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method put">PUT</span> /api/trips/{id} <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method delete">DELETE</span> /api/trips/{id} <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method post">POST</span> /api/trips/{id}/items <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method put">PUT</span> /api/trips/{id}/items/{itemId} <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method delete">DELETE</span> /api/trips/{id}/items/{itemId} <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method post">POST</span> /api/trips/{id}/optimize <span class="lock">🔒</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/admin/dashboard <span class="lock">👑</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/admin/users <span class="lock">👑</span></div>
+                <div class="toc-item"><span class="method put">PUT</span> /api/admin/users/{id}/status <span class="lock">👑</span></div>
+                <div class="toc-item"><span class="method get">GET</span> /api/admin/attractions <span class="lock">👑</span></div>
+                <div class="toc-item"><span class="method put">PUT</span> /api/admin/attractions/{id}/status <span class="lock">👑</span></div>
+            </div>
+        </div>
+
+        <!-- 一、通用说明 -->
+        <h2>一、通用说明</h2>
+
+        <h3>统一响应格式</h3>
+        <pre><code>{
+    "code": 0,           // 0=成功, 400=客户端错误, 500=服务端错误
+    "message": "success", // 提示信息
+    "data": { ... }      // 响应数据（为 null 时不序列化）
+}</code></pre>
+
+        <h3>认证与权限体系</h3>
+        <table>
+            <tr><th>角色</th><th>Authority</th><th>说明</th></tr>
+            <tr><td>普通用户</td><td><code>ROLE_USER</code></td><td>注册时默认分配，可用所有需要登录的非管理接口</td></tr>
+            <tr><td>管理员</td><td><code>ROLE_ADMIN</code></td><td>需数据库直接修改 role 字段，可访问 <code>/api/admin/**</code></td></tr>
+        </table>
+
+        <div class="auth-flow">
+            <h4 style="margin:0 0 12px;">JWT 认证流程</h4>
+            <ol class="auth-steps">
+                <li>注册/登录 → 服务端签发 JWT，设置 Redis 缓存（含 <code>ROLE_xxx</code>）</li>
+                <li>后续请求在 Header 携带 <code>Authorization: Bearer &lt;token&gt;</code></li>
+                <li><code>JwtAuthenticationFilter</code> 拦截 → 验证 Token → 从 Redis 读取 CachedUser</li>
+                <li>将用户 authorities 写入 <code>SecurityContextHolder</code> + <code>UserContext</code> (ThreadLocal)</li>
+                <li>管理员接口通过 <code>@PreAuthorize("hasRole('ADMIN')")</code> 保护</li>
+            </ol>
+        </div>
+
+        <h3>用户状态</h3>
+        <table>
+            <tr><th>status</th><th>含义</th><th>说明</th></tr>
+            <tr><td><code>1</code></td><td>正常</td><td>注册时默认，可正常登录</td></tr>
+            <tr><td><code>0</code></td><td>禁用</td><td>管理员操作，登录时报"账号已被禁用"</td></tr>
+        </table>
+
+        <h3>异常处理</h3>
+        <table class="error-table">
+            <tr><th>Exception</th><th>HTTP</th><th>code</th><th>message</th></tr>
+            <tr><td><code>RuntimeException</code></td><td>400</td><td>400</td><td>异常的 message（动态）</td></tr>
+            <tr><td><code>MethodArgumentNotValidException</code></td><td>400</td><td>400</td><td>第一条校验失败消息</td></tr>
+            <tr><td>其他 <code>Exception</code></td><td>500</td><td>500</td><td>"服务器内部错误"</td></tr>
+        </table>
+
+        <div class="note">
+            <strong>测试建议：</strong>先 <code>POST /api/users/register</code> 注册 → 拿到 Token → 放入 <code>Authorization: Bearer &lt;token&gt;</code> → 访问受保护接口。管理员接口需要数据库中将用户 <code>role</code> 字段设为 <code>"ADMIN"</code>，重新登录后生效。
+        </div>
+
+        <!-- 二、用户模块 -->
+        <h2>二、用户模块 — /api/users</h2>
+
+        <!-- 注册 -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-url">/api/users/register</span>
+                <span class="badge pub">公开</span>
+            </div>
+            <div class="endpoint-body">
+                <p>用户注册。默认分配 <strong>USER</strong> 角色，status=1（正常）。成功后返回用户信息和 JWT Token。</p>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>必填</th><th>校验</th><th>说明</th></tr>
+                    <tr><td><code>username</code></td><td>String</td><td>是</td><td>@NotBlank, @Size(min=3, max=50)</td><td>用户名，3~50位</td></tr>
+                    <tr><td><code>password</code></td><td>String</td><td>是</td><td>@NotBlank, @Size(min=8)</td><td>密码，至少8位</td></tr>
+                    <tr><td><code>email</code></td><td>String</td><td>是</td><td>@NotBlank, @Email</td><td>邮箱</td></tr>
+                </table>
+                <pre><code>POST /api/users/register
+Content-Type: application/json
+
+{
+    "username": "john_doe",
+    "password": "password123",
+    "email": "john@example.com"
+}</code></pre>
+                <h4>成功响应 (200)</h4>
+                <pre><code>{
+    "code": 0,
+    "message": "success",
+    "data": { "userId": 1, "username": "john_doe", "token": "eyJhbG..." }
+}</code></pre>
+                <h4>错误码</h4>
+                <table class="error-table">
+                    <tr><th>code</th><th>message</th></tr>
+                    <tr><td>400</td><td>用户名已存在</td></tr>
+                    <tr><td>400</td><td>邮箱已被注册</td></tr>
+                    <tr><td>400</td><td>(字段校验失败消息)</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 登录 -->
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-url">/api/users/login</span>
+                <span class="badge pub">公开</span>
+            </div>
+            <div class="endpoint-body">
+                <p>用户登录。会检查用户是否被禁用（status=0），正常登录后返回包含角色信息的 JWT Token。</p>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>必填</th><th>校验</th><th>说明</th></tr>
+                    <tr><td><code>username</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>用户名</td></tr>
+                    <tr><td><code>password</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>密码</td></tr>
+                </table>
+                <pre><code>POST /api/users/login
+Content-Type: application/json
+
+{
+    "username": "john_doe",
+    "password": "password123"
+}</code></pre>
+                <h4>成功响应 (200)</h4>
+                <pre><code>{
+    "code": 0,
+    "message": "success",
+    "data": { "userId": 1, "username": "john_doe", "token": "eyJhbG..." }
+}</code></pre>
+                <h4>错误码</h4>
+                <table class="error-table">
+                    <tr><th>code</th><th>message</th></tr>
+                    <tr><td>400</td><td>用户名或密码错误</td></tr>
+                    <tr><td>400</td><td>账号已被禁用</td></tr>
+                    <tr><td>400</td><td>(字段校验失败消息)</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 三、景点模块 -->
+        <h2>三、景点模块 — /api/attractions</h2>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/attractions</span>
+                <span class="badge pub">公开</span>
+            </div>
+            <div class="endpoint-body">
+                <p>景点分页列表，支持分类、城市、关键词筛选。仅返回上架（status=1）景点，按创建时间倒序。</p>
+                <h4>Query 参数</h4>
+                <table>
+                    <tr><th>参数</th><th>类型</th><th>必填</th><th>默认</th><th>说明</th></tr>
+                    <tr><td><code>page</code></td><td>Integer</td><td>否</td><td>1</td><td>页码</td></tr>
+                    <tr><td><code>size</code></td><td>Integer</td><td>否</td><td>10</td><td>每页条数</td></tr>
+                    <tr><td><code>category</code></td><td>String</td><td>否</td><td>-</td><td>分类筛选</td></tr>
+                    <tr><td><code>city</code></td><td>String</td><td>否</td><td>-</td><td>城市筛选</td></tr>
+                    <tr><td><code>keyword</code></td><td>String</td><td>否</td><td>-</td><td>模糊搜索（名称+描述）</td></tr>
+                </table>
+                <pre><code>GET /api/attractions?page=1&size=10&city=北京&category=历史遗迹</code></pre>
+                <h4>成功响应</h4>
+                <pre><code>{
+    "code": 0, "message": "success",
+    "data": { "records": [ Attraction... ], "total": 100, "page": 1, "size": 10 }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/attractions/{id}</span>
+                <span class="badge pub">公开</span>
+            </div>
+            <div class="endpoint-body">
+                <p>景点详情。访问时自动记录 VIEW 行为并增加浏览计数（登录用户写入 user_behaviors 表）。</p>
+                <h4>路径参数</h4>
+                <table><tr><th>参数</th><th>类型</th></tr><tr><td><code>id</code></td><td>Long</td></tr></table>
+                <h4>成功响应</h4>
+                <pre><code>{
+    "code": 0, "message": "success",
+    "data": {
+        "id": 1, "name": "故宫", "category": "历史遗迹", "city": "北京",
+        "latitude": 39.9163, "longitude": 116.3972, "rating": 5, "status": 1,
+        "viewCount": 1024, "createdAt": "2026-01-01T00:00:00"
+    }
+}</code></pre>
+                <h4>错误码</h4>
+                <table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>景点不存在或已下架</td></tr></table>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-url">/api/attractions</span>
+                <span class="badge auth">需认证</span>
+            </div>
+            <div class="endpoint-body">
+                <p>创建景点。rating 默认 0，status 默认 1。</p>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>必填</th><th>校验</th><th>说明</th></tr>
+                    <tr><td><code>name</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>景点名称</td></tr>
+                    <tr><td><code>description</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>描述</td></tr>
+                    <tr><td><code>category</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>分类</td></tr>
+                    <tr><td><code>city</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>城市</td></tr>
+                    <tr><td><code>address</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>地址</td></tr>
+                    <tr><td><code>latitude</code></td><td>Double</td><td>是</td><td>@NotNull</td><td>纬度</td></tr>
+                    <tr><td><code>longitude</code></td><td>Double</td><td>是</td><td>@NotNull</td><td>经度</td></tr>
+                    <tr><td><code>imageUrl</code></td><td>String</td><td>否</td><td>-</td><td>图片地址</td></tr>
+                </table>
+                <h4>成功响应 — Attraction 对象</h4>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method put">PUT</span>
+                <span class="endpoint-url">/api/attractions/{id}</span>
+                <span class="badge auth">需认证</span>
+            </div>
+            <div class="endpoint-body">
+                <p>更新景点，仅更新非 null 字段，更新后清除 Redis 缓存。</p>
+                <h4>请求体（全部可选）</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                    <tr><td><code>name</code></td><td>String</td><td>名称</td></tr>
+                    <tr><td><code>description</code></td><td>String</td><td>描述</td></tr>
+                    <tr><td><code>category</code></td><td>String</td><td>分类</td></tr>
+                    <tr><td><code>city</code></td><td>String</td><td>城市</td></tr>
+                    <tr><td><code>address</code></td><td>String</td><td>地址</td></tr>
+                    <tr><td><code>latitude</code></td><td>Double</td><td>纬度</td></tr>
+                    <tr><td><code>longitude</code></td><td>Double</td><td>经度</td></tr>
+                    <tr><td><code>imageUrl</code></td><td>String</td><td>图片URL</td></tr>
+                    <tr><td><code>rating</code></td><td>Integer</td><td>评分</td></tr>
+                    <tr><td><code>status</code></td><td>Integer</td><td>1=上架 / 0=下架</td></tr>
+                </table>
+                <h4>错误码</h4>
+                <table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>景点不存在</td></tr></table>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method delete">DELETE</span>
+                <span class="endpoint-url">/api/attractions/{id}</span>
+                <span class="badge auth">需认证</span>
+            </div>
+            <div class="endpoint-body">
+                <p>删除景点。</p>
+                <h4>错误码</h4>
+                <table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>景点不存在</td></tr></table>
+            </div>
+        </div>
+
+        <!-- 四、行为模块 -->
+        <h2>四、行为模块 — /api/behaviors</h2>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-url">/api/behaviors</span>
+                <span class="badge auth">需认证</span>
+            </div>
+            <div class="endpoint-body">
+                <p>记录当前用户行为。userId 由后台自动获取。</p>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>必填</th><th>校验</th><th>说明</th></tr>
+                    <tr><td><code>attractionId</code></td><td>Long</td><td>是</td><td>@NotNull</td><td>景点ID</td></tr>
+                    <tr><td><code>actionType</code></td><td>String</td><td>是</td><td>@NotBlank</td><td>VIEW / LIKE / BOOKMARK</td></tr>
+                    <tr><td><code>actionValue</code></td><td>Integer</td><td>否</td><td>-</td><td>行为权重值</td></tr>
+                </table>
+                <pre><code>{
+    "attractionId": 1,
+    "actionType": "LIKE",
+    "actionValue": 5
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/behaviors</span>
+                <span class="badge auth">需认证</span>
+            </div>
+            <div class="endpoint-body">
+                <p>当前用户行为列表（分页）。</p>
+                <h4>Query</h4>
+                <table>
+                    <tr><th>参数</th><th>类型</th><th>默认</th></tr>
+                    <tr><td><code>page</code></td><td>Integer</td><td>1</td></tr>
+                    <tr><td><code>size</code></td><td>Integer</td><td>10</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- 五、推荐模块 -->
+        <h2>五、推荐模块 — /api/recommendations</h2>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/recommendations</span>
+                <span class="badge pub">公开</span>
+            </div>
+            <div class="endpoint-body">
+                <p>三级递进推荐引擎，登录/未登录均可用。</p>
+                <h4>Query</h4>
+                <table>
+                    <tr><th>参数</th><th>类型</th><th>默认</th></tr>
+                    <tr><td><code>limit</code></td><td>int</td><td>10</td></tr>
+                </table>
+                <div class="info">
+                    <strong>推荐策略：</strong><br>
+                    <strong>未登录 →</strong> 全局热门（viewCount 降序）<br>
+                    <strong>已登录 Tier 1 →</strong> 用户交互过的 Top3 分类同类推荐<br>
+                    <strong>已登录 Tier 2 →</strong> 用户最常访问的城市同城推荐<br>
+                    <strong>已登录 Tier 3 →</strong> 全局热门兜底<br>
+                    已登录结果 Redis 缓存 600s。
+                </div>
+                <pre><code>GET /api/recommendations?limit=10</code></pre>
+                <h4>成功响应 — List&lt;Attraction&gt;</h4>
+            </div>
+        </div>
+
+        <!-- 六、行程模块 -->
+        <h2>六、行程模块 — /api/trips</h2>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method post">POST</span><span class="endpoint-url">/api/trips</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body">
+                <p>创建行程。totalDays 自动计算，status 默认 0。</p>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                    <tr><td><code>title</code></td><td>String</td><td>行程标题</td></tr>
+                    <tr><td><code>description</code></td><td>String</td><td>描述</td></tr>
+                    <tr><td><code>startDate</code></td><td>LocalDate</td><td>开始日期</td></tr>
+                    <tr><td><code>endDate</code></td><td>LocalDate</td><td>结束日期</td></tr>
+                </table>
+                <pre><code>{
+    "title": "北京三日游",
+    "description": "带家人逛北京",
+    "startDate": "2026-07-01",
+    "endDate": "2026-07-03"
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method get">GET</span><span class="endpoint-url">/api/trips</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body">
+                <p>当前用户行程列表（分页）。</p>
+                <h4>Query: page (默认1), size (默认10)</h4>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method get">GET</span><span class="endpoint-url">/api/trips/{id}</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body"><p>行程详情。</p><table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>行程不存在</td></tr></table></div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method get">GET</span><span class="endpoint-url">/api/trips/{id}/attractions</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body"><p>行程景点列表，按 dayNumber + sortOrder 升序。— List&lt;Attraction&gt;</p></div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method put">PUT</span><span class="endpoint-url">/api/trips/{id}</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body">
+                <p>更新行程。更新日期后自动重算 totalDays。</p>
+                <h4>请求体（全部可选）: title, description, startDate, endDate, status</h4>
+                <table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>行程不存在</td></tr></table>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method delete">DELETE</span><span class="endpoint-url">/api/trips/{id}</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body"><p>删除行程，级联删除 TripPlanItem。</p><table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>行程不存在</td></tr></table></div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method post">POST</span><span class="endpoint-url">/api/trips/{id}/items</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body">
+                <p>向行程添加景点。</p>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                    <tr><td><code>attractionId</code></td><td>Long</td><td>景点ID</td></tr>
+                    <tr><td><code>dayNumber</code></td><td>Integer</td><td>第几天（默认1）</td></tr>
+                    <tr><td><code>sortOrder</code></td><td>Integer</td><td>排序号（默认0）</td></tr>
+                    <tr><td><code>duration</code></td><td>Integer</td><td>游览时长（分钟）</td></tr>
+                    <tr><td><code>transportMode</code></td><td>String</td><td>交通方式</td></tr>
+                    <tr><td><code>notes</code></td><td>String</td><td>备注</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method put">PUT</span><span class="endpoint-url">/api/trips/{id}/items/{itemId}</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body">
+                <p>更新行程景点项（全部可选: dayNumber, sortOrder, duration, transportMode, notes）。</p>
+                <table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>行程景点不存在</td></tr></table>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method delete">DELETE</span><span class="endpoint-url">/api/trips/{id}/items/{itemId}</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body"><p>移除行程景点。</p><table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>行程景点不存在</td></tr></table></div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header"><span class="method post">POST</span><span class="endpoint-url">/api/trips/{id}/optimize</span><span class="badge auth">需认证</span></div>
+            <div class="endpoint-body">
+                <p>智能路线优化，使用百度地图矩阵API + 贪心最近邻算法重排景点顺序。</p>
+                <div class="info">
+                    1. 按 dayNumber 分组 → 2. 百度地图驾车矩阵API 获取距离 → 3. API失败用欧氏距离兜底 → 4. 贪心最近邻重排 → 5. 更新 sortOrder。景点 ≤1 时直接返回。
+                </div>
+            </div>
+        </div>
+
+        <!-- 七、管理后台模块 ★NEW -->
+        <h2>七、管理后台模块 — /api/admin <span class="badge admin">NEW</span></h2>
+        <div class="info">
+            <strong>所有 /api/admin/** 接口需要 ADMIN 角色。</strong>注册默认 USER 角色，需在数据库中将用户 <code>role</code> 字段改为 <code>"ADMIN"</code>，重新登录后生效。
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/admin/dashboard</span>
+                <span class="badge admin">ADMIN</span>
+            </div>
+            <div class="endpoint-body">
+                <p>管理后台仪表盘，返回平台核心统计数据。</p>
+                <h4>成功响应</h4>
+                <pre><code>{
+    "code": 0,
+    "message": "success",
+    "data": {
+        "userCount": 10,        // 总用户数
+        "attractionCount": 25,  // 上架景点数
+        "totalBehaviors": 60,   // 总行为记录数
+        "todayNewUsers": 1,     // 今日新增用户
+        "todayBehaviors": 5     // 今日行为数
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/admin/users</span>
+                <span class="badge admin">ADMIN</span>
+            </div>
+            <div class="endpoint-body">
+                <p>用户管理列表，支持关键词搜索。不会返回密码字段。</p>
+                <h4>Query</h4>
+                <table>
+                    <tr><th>参数</th><th>类型</th><th>必填</th><th>默认</th><th>说明</th></tr>
+                    <tr><td><code>page</code></td><td>Integer</td><td>否</td><td>1</td><td>页码</td></tr>
+                    <tr><td><code>size</code></td><td>Integer</td><td>否</td><td>10</td><td>每页条数</td></tr>
+                    <tr><td><code>keyword</code></td><td>String</td><td>否</td><td>-</td><td>按用户名或邮箱搜索</td></tr>
+                </table>
+                <h4>成功响应</h4>
+                <pre><code>{
+    "code": 0, "message": "success",
+    "data": {
+        "records": [ { "id":1,"username":"zhangsan","email":"...","role":"USER","status":1, ... } ],
+        "total": 10, "page": 1, "size": 10
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method put">PUT</span>
+                <span class="endpoint-url">/api/admin/users/{id}/status</span>
+                <span class="badge admin">ADMIN</span>
+            </div>
+            <div class="endpoint-body">
+                <p>切换用户启用/禁用状态。</p>
+                <h4>路径参数</h4>
+                <table><tr><th>参数</th><th>类型</th></tr><tr><td><code>id</code></td><td>Long</td></tr></table>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                    <tr><td><code>status</code></td><td>Integer</td><td>1=启用 / 0=禁用</td></tr>
+                </table>
+                <pre><code>PUT /api/admin/users/1/status
+Content-Type: application/json
+
+{ "status": 0 }</code></pre>
+                <h4>成功响应</h4>
+                <pre><code>{ "code": 0, "message": "success" }</code></pre>
+                <h4>错误码</h4>
+                <table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>用户不存在</td></tr></table>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-url">/api/admin/attractions</span>
+                <span class="badge admin">ADMIN</span>
+            </div>
+            <div class="endpoint-body">
+                <p>景点管理列表，支持关键词搜索。包含所有景点（含下架）。</p>
+                <h4>Query: page (默认1), size (默认10), keyword (按名称搜索)</h4>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method put">PUT</span>
+                <span class="endpoint-url">/api/admin/attractions/{id}/status</span>
+                <span class="badge admin">ADMIN</span>
+            </div>
+            <div class="endpoint-body">
+                <p>切换景点上架/下架状态。</p>
+                <h4>路径参数: id (Long)</h4>
+                <h4>请求体</h4>
+                <table>
+                    <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+                    <tr><td><code>status</code></td><td>Integer</td><td>1=上架 / 0=下架</td></tr>
+                </table>
+                <pre><code>PUT /api/admin/attractions/1/status
+Content-Type: application/json
+
+{ "status": 0 }</code></pre>
+                <h4>错误码</h4>
+                <table class="error-table"><tr><th>code</th><th>message</th></tr><tr><td>400</td><td>景点不存在</td></tr></table>
+            </div>
+        </div>
+
+        <hr>
+
+        <!-- 汇总表 -->
+        <h2>八、接口汇总</h2>
+        <table class="summary-table">
+            <tr><th>#</th><th>方法</th><th>路径</th><th>模块</th><th>认证</th><th>功能</th></tr>
+            <tr><td>1</td><td><code>POST</code></td><td><code>/api/users/register</code></td><td>用户</td><td>🔓</td><td>用户注册</td></tr>
+            <tr><td>2</td><td><code>POST</code></td><td><code>/api/users/login</code></td><td>用户</td><td>🔓</td><td>用户登录</td></tr>
+            <tr><td>3</td><td><code>GET</code></td><td><code>/api/attractions</code></td><td>景点</td><td>🔓</td><td>景点分页列表</td></tr>
+            <tr><td>4</td><td><code>GET</code></td><td><code>/api/attractions/{id}</code></td><td>景点</td><td>🔓</td><td>景点详情</td></tr>
+            <tr><td>5</td><td><code>POST</code></td><td><code>/api/attractions</code></td><td>景点</td><td>🔒</td><td>创建景点</td></tr>
+            <tr><td>6</td><td><code>PUT</code></td><td><code>/api/attractions/{id}</code></td><td>景点</td><td>🔒</td><td>更新景点</td></tr>
+            <tr><td>7</td><td><code>DELETE</code></td><td><code>/api/attractions/{id}</code></td><td>景点</td><td>🔒</td><td>删除景点</td></tr>
+            <tr><td>8</td><td><code>POST</code></td><td><code>/api/behaviors</code></td><td>行为</td><td>🔒</td><td>记录用户行为</td></tr>
+            <tr><td>9</td><td><code>GET</code></td><td><code>/api/behaviors</code></td><td>行为</td><td>🔒</td><td>我的行为列表</td></tr>
+            <tr><td>10</td><td><code>GET</code></td><td><code>/api/recommendations</code></td><td>推荐</td><td>🔓</td><td>景点推荐</td></tr>
+            <tr><td>11</td><td><code>POST</code></td><td><code>/api/trips</code></td><td>行程</td><td>🔒</td><td>创建行程</td></tr>
+            <tr><td>12</td><td><code>GET</code></td><td><code>/api/trips</code></td><td>行程</td><td>🔒</td><td>我的行程列表</td></tr>
+            <tr><td>13</td><td><code>GET</code></td><td><code>/api/trips/{id}</code></td><td>行程</td><td>🔒</td><td>行程详情</td></tr>
+            <tr><td>14</td><td><code>GET</code></td><td><code>/api/trips/{id}/attractions</code></td><td>行程</td><td>🔒</td><td>行程景点列表</td></tr>
+            <tr><td>15</td><td><code>PUT</code></td><td><code>/api/trips/{id}</code></td><td>行程</td><td>🔒</td><td>更新行程</td></tr>
+            <tr><td>16</td><td><code>DELETE</code></td><td><code>/api/trips/{id}</code></td><td>行程</td><td>🔒</td><td>删除行程</td></tr>
+            <tr><td>17</td><td><code>POST</code></td><td><code>/api/trips/{id}/items</code></td><td>行程</td><td>🔒</td><td>添加景点到行程</td></tr>
+            <tr><td>18</td><td><code>PUT</code></td><td><code>/api/trips/{id}/items/{itemId}</code></td><td>行程</td><td>🔒</td><td>更新行程景点</td></tr>
+            <tr><td>19</td><td><code>DELETE</code></td><td><code>/api/trips/{id}/items/{itemId}</code></td><td>行程</td><td>🔒</td><td>移除行程景点</td></tr>
+            <tr><td>20</td><td><code>POST</code></td><td><code>/api/trips/{id}/optimize</code></td><td>行程</td><td>🔒</td><td>智能优化路线</td></tr>
+            <tr style="background:#faf5ff;"><td>21</td><td><code>GET</code></td><td><code>/api/admin/dashboard</code></td><td>管理</td><td>👑</td><td>仪表盘统计</td></tr>
+            <tr style="background:#faf5ff;"><td>22</td><td><code>GET</code></td><td><code>/api/admin/users</code></td><td>管理</td><td>👑</td><td>用户管理列表</td></tr>
+            <tr style="background:#faf5ff;"><td>23</td><td><code>PUT</code></td><td><code>/api/admin/users/{id}/status</code></td><td>管理</td><td>👑</td><td>启用/禁用用户</td></tr>
+            <tr style="background:#faf5ff;"><td>24</td><td><code>GET</code></td><td><code>/api/admin/attractions</code></td><td>管理</td><td>👑</td><td>景点管理列表</td></tr>
+            <tr style="background:#faf5ff;"><td>25</td><td><code>PUT</code></td><td><code>/api/admin/attractions/{id}/status</code></td><td>管理</td><td>👑</td><td>上架/下架景点</td></tr>
+        </table>
+    </div>
+</body>
+</html>
