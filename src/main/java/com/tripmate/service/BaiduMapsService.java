@@ -35,7 +35,7 @@ public class BaiduMapsService {
      * @return distance[i][j] = 从 coords[i] 到 coords[j] 的距离(米)，
      *         duration[i][j] = 从 coords[i] 到 coords[j] 的时长(秒)
      */
-    public RouteMatrix getDrivingMatrix(List<Coord> coords) {
+    /*public RouteMatrix getDrivingMatrix(List<Coord> coords) {
         int n = coords.size();
         String origins = coordsToParam(coords);
         String destinations = origins; // 方阵
@@ -75,7 +75,7 @@ public class BaiduMapsService {
 
         return new RouteMatrix(distance, duration);
     }
-
+*/
     /**
      * 公交路线规划。
      * @param origin 起点坐标
