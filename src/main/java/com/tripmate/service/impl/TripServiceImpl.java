@@ -44,6 +44,8 @@ public class TripServiceImpl implements TripService {
         return tripMapper.selectList(wrapper);
     }
 
+
+
     @Override
     public Trip getDetail(Long tripId, Long userId) {
         Trip trip = tripMapper.selectById(tripId);
