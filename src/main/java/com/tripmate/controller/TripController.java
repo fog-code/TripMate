@@ -95,8 +95,20 @@ public class TripController {
     @DeleteMapping("/{id}/items/{itemId}")
     public Result<?> removeItem(@PathVariable Long id, @PathVariable Long itemId) {
         Long userId = UserContext.getUserId();
-        log.info("用户 {} 从旅行 {} 移除景点明细 {}", userId, id, itemId);
         tripService.removeItem(id, userId, itemId);
+        return Result.success();
+    }
+
+    /** 更新行程项（跨天移动 / 排序） */
+    @PutMapping("/{id}/items/{itemId}")
+    public Result<?> updateItem(@PathVariable Long id, @PathVariable Long itemId,
+                                 @RequestBody Map<String, Object> body) {
+        Long userId = UserContext.getUserId();
+        Integer dayNumber = body.get("dayNumber") != null
+                ? ((Number) body.get("dayNumber")).intValue() : null;
+        Integer orderIndex = body.get("orderIndex") != null
+                ? ((Number) body.get("orderIndex")).intValue() : null;
+        tripService.updateItem(id, userId, itemId, dayNumber, orderIndex);
         return Result.success();
     }
 

@@ -36,6 +36,9 @@ public class Trip {
     /** 旅行状态：1=规划中，2=已完成 */
     private Integer status;
 
+    /** 路线规划结果 JSON（持久化） */
+    private String routeData;
+
     /** 创建时间 */
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
