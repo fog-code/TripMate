@@ -50,4 +50,8 @@ public class Trip {
     /** 景点明细列表（非数据库字段，getDetail 时填充，含景点详细信息） */
     @TableField(exist = false)
     private List<Map<String, Object>> items;
+
+    /** 景点数量（非数据库字段，列表接口填充，用于行程列表页展示） */
+    @TableField(exist = false)
+    private Integer itemCount;
 }

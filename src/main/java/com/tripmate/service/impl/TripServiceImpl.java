@@ -50,10 +50,22 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public List<Trip> listByUser(Long userId) {
-        return tripMapper.selectList(
+        List<Trip> trips = tripMapper.selectList(
                 new LambdaQueryWrapper<Trip>()
                         .eq(Trip::getUserId, userId)
                         .orderByDesc(Trip::getUpdatedAt));
+        // 批量统计每个行程的景点数量，避免列表页误显示 0
+        if (!trips.isEmpty()) {
+            Set<Long> tripIds = trips.stream().map(Trip::getId).collect(Collectors.toSet());
+            List<TripItem> allItems = tripItemMapper.selectList(
+                    new LambdaQueryWrapper<TripItem>().in(TripItem::getTripId, tripIds));
+            Map<Long, Long> countMap = allItems.stream()
+                    .collect(Collectors.groupingBy(TripItem::getTripId, Collectors.counting()));
+            for (Trip t : trips) {
+                t.setItemCount(countMap.getOrDefault(t.getId(), 0L).intValue());
+            }
+        }
+        return trips;
     }
 
     @Override
