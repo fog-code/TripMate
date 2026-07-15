@@ -236,7 +236,8 @@ public class TripServiceImpl implements TripService {
         for (Map<String, Object> im : items) {
             Long itemId = toLong(im.get("id"));
             Integer orderIndex = toInt(im.get("orderIndex"));
-            if (itemId == null || orderIndex == null) continue;
+            if (itemId == null || orderIndex == null) {
+                continue;}
             TripItem item = tripItemMapper.selectById(itemId);
             if (item != null && item.getTripId().equals(tripId)) {
                 item.setOrderIndex(orderIndex);
